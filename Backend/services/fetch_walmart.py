@@ -13,42 +13,27 @@ def parse_price(raw_price):
     clean = re.sub(r"[^\d]", "", raw_price)
     return int(clean) if clean else 0
 
-def fetch_walmart_products(query):
-    try:
-        url = f"https://walmart-search.p.rapidapi.com/search?query={query}&country=in"
-        headers = {
-            "x-rapidapi-key": WALMART_API_KEY,
-            "x-rapidapi-host": "walmart-search.p.rapidapi.com",
+def fetch_walmart_products(query: str):
+    return [
+        {
+            "title": f"{query} - Walmart Budget",
+            "price": 27999,
+            "rating": 4.1,
+            "image": "/images/walmart_budget.jpg",
+            "link": "https://walmart.com/mock-product-budget",
+            "platform": "Walmart",
+            "storeLat": 12.9716,
+            "storeLon": 77.5946
+        },
+        {
+            "title": f"{query} - Walmart Pro",
+            "price": 45999,
+            "rating": 4.5,
+            "image": "/images/walmart_pro.jpg",
+            "link": "https://walmart.com/mock-product-pro",
+            "platform": "Walmart",
+            "storeLat": 12.9716,
+            "storeLon": 77.5946
         }
+    ]
 
-        response = httpx.get(url, headers=headers, timeout=10.0)
-        if response.status_code != 200:
-            print("Walmart API Error:", response.status_code, response.text)
-            return []
-
-        items = response.json().get("data", {}).get("products", [])
-        result = []
-        for i in items:
-            title = i.get("title")
-            raw_price = i.get("price", {}).get("raw", "")
-            price = parse_price(raw_price)
-            rating = i.get("rating", 0) or 0
-
-            if not title or not price:
-                continue
-
-            result.append({
-                "title": title,
-                "price": price,
-                "rating": float(rating),
-                "image": i.get("image"),
-                "link": i.get("product_url"),
-                "platform": "Walmart",
-                "storeLat": 12.9716,
-                "storeLon": 77.5946,
-            })
-        return result
-
-    except Exception as e:
-        print("Walmart Fetch Exception:", e)
-        return []
